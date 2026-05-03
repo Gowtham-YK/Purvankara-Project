@@ -1,4 +1,4 @@
 bangalore_graph.graphml
 cache/
-*.json
+!data/*.json
 __pycache__/

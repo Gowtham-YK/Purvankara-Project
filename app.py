@@ -4,6 +4,43 @@ import json
 import os
 import math
 import requests
+
+def format_clean_address(address, lat, lon):
+    try:
+        # PRIORITY ORDER (VERY IMPORTANT)
+        place = (
+            address.get("building") or
+            address.get("amenity") or
+            address.get("residential") or
+            address.get("village") or
+            address.get("hamlet")
+        )
+
+        area = (
+            address.get("suburb") or
+            address.get("neighbourhood")
+        )
+
+        road = address.get("road")
+        district = address.get("state_district")
+        state = address.get("state")
+        pincode = address.get("postcode")
+
+        formatted = ", ".join(filter(None, [
+            place,
+            area,
+            road,
+            district,
+            state,
+            pincode
+        ]))
+
+        return formatted if formatted else f"{lat}, {lon}"
+
+    except Exception as e:
+        print("Format error:", e)
+        return f"{lat}, {lon}"
+    
 import csv
 from datetime import datetime, date
 import osmnx as ox
@@ -267,31 +304,14 @@ def api_search_place():
         except Exception as e:
             print("Reverse API failed:", e)
             data = {}
-
+        
         address = data.get("address", {})
 
-        # 🔥 STRONG ADDRESS BUILDER
-        # ✅ CLEAN + CONSISTENT ADDRESS
+        location_name = format_clean_address(address, lat, lon)
 
-        road = address.get("road")
-        area = address.get("suburb") or address.get("neighbourhood")
-        city = address.get("city") or address.get("town")
-        state = address.get("state")
-        pincode = address.get("postcode")
-
-        location_name = ", ".join(filter(None, [
-            road,
-            city,
-            state,
-            pincode
-        ]))
-
-        # 🔥 GUARANTEED FALLBACK (NO "Live Location")
-        if not location_name:
-            location_name = f"{lat:.5f}, {lon:.5f}"
-
+        # fallback (if still empty)
         if not location_name or location_name.strip() == "":
-            location_name = f"{lat}, {lon}"
+            location_name = data.get("display_name", f"{lat}, {lon}")
 
         print("Using LIVE coordinates:", lat, lon)
 
