@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Wastewater Routing Optimization System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        }
+
+        .login-container {
+            width: 900px;
+            height: 520px;
+            display: flex;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            width: 50%;
+            background: linear-gradient(135deg, #2563eb, #16a34a);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left-panel h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .left-panel p {
+            font-size: 15px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            width: 50%;
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right-panel h2 {
+            margin-bottom: 30px;
+            color: #1f2937;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+            color: #374151;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            outline: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+        }
+
+        .login-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #16a34a;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+
+        .back-link {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .back-link a {
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .login-container {
+                flex-direction: column;
+                width: 95%;
+                height: auto;
+            }
+
+            .left-panel, .right-panel {
+                width: 100%;
+                padding: 40px 30px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+
+    <!-- LEFT SIDE -->
+    <div class="left-panel">
+        <h1>Treated Wastewater Routing Optimization System</h1>
+        <p>
+            Intelligent platform for wastewater matching, treatment routing,
+            and supply-demand optimization using machine learning and
+            geospatial analytics.
+        </p>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right-panel">
+        <h2>Login to Continue</h2>
+
+        <form method="POST" action="{{ url_for('login') }}">
+
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Enter your name">
+            </div>
+            
+            <div class="input-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="Enter your phone number">
+            </div>
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <div class="input-group">
+                <label>Login As</label>
+                <select name="role" required>
+                    <option value="">Select Role</option>
+                    <option value="stp">STP Operator</option>
+                    <option value="demand">Demand Site User</option>
+                    <option value="tanker">Tanker Operator</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <button type="submit" class="login-btn">Login</button>
+
+        </form>
+
+        <div class="back-link">
+            <a href="{{ url_for('home') }}">← Back to Home</a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

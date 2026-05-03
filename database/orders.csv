@@ -1,0 +1,6 @@
+order_id,stp_id,stp_name,quantity_kld,quality,water_type,distance_km,location,buyer_name,buyer_phone,status,created_at
+ORD1777756736,PSTP003,Starworth - Harmony,50,Gold,,32.64,"Kanakapura Road, Karnataka, 562112, India",John,09234128092,Out for Delivery,2026-05-03 02:48:56
+ORD1777756942,PSTP008,Purva Venezia,50,Platinum,,41.76,"BWSSB Pipeline Track, Karnataka, 562112, India",John,09234128092,Out for Delivery,2026-05-03 02:52:22
+ORD1777817617,PSTP003,Starworth - Harmony,50,Gold,,32.64,"DSU SOE Entrance Rd, Karnataka, 562112, India",John,09234128092,Out for Delivery,2026-05-03 19:43:37
+ORD1777818188,PSTP003,Starworth - Harmony,50,Gold,,32.64,"DSU SOE Entrance Rd, Karnataka, 562112",John,09234128092,Out for Delivery,2026-05-03 19:53:08
+ORD1777818417,PSTP008,Purva Venezia,50,Platinum,,41.76,"DSU SOE Entrance Rd, Karnataka, 562112",John,09234128092,Out for Delivery,2026-05-03 19:56:57

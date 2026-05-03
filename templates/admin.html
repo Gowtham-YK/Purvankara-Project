@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f4f7fb;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #007bff, #00c6ff);
+            color: white;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        /* CONTAINER */
+        .container {
+            padding: 30px;
+        }
+
+        /* CARD */
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        /* FORM */
+        input {
+            padding: 10px;
+            margin: 8px 5px 8px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 180px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            min-width: 600px; /* 🔥 prevents breaking */
+        }
+
+        table th {
+            background: #007bff;
+            color: white;
+            padding: 12px;
+        }
+
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap; /* 🔥 prevents overflow */
+        }
+
+        table tr:hover {
+            background: #f1f5ff;
+        }
+
+        /* WRAPPER FIX */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        /* DELETE BUTTON */
+        .delete-btn {
+            background: #dc3545;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .delete-btn:hover {
+            background: #a71d2a;
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .grid .card {
+            min-width: 0; /* 🔥 critical fix */
+        }
+
+        /* ALIGNMENT FIX */
+        table th {
+            text-align: left;
+        }
+
+        table td {
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        /* DIM TEXT (clean UI) */
+        table td {
+            color: #555;   /* softer than black */
+            font-weight: 400;
+        }
+
+        /* HEADER STRONGER */
+        table th {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* SPACING IMPROVEMENT */
+        table td, table th {
+            padding: 12px 14px;
+        }
+
+        .logout-btn{
+    background:#ef4444;
+    border:none;
+    padding:8px 16px;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:500;
+}
+
+.logout-btn:hover{
+    background:#dc2626;
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h1>STP Management System</h1>
+
+    <div class="nav-links">
+        <a href="/admin">Admin</a>
+        <a href="/demand">Demand</a>
+        <a href="/supply">Supply</a>
+        <a href="/tanker">Tanker</a>
+        <a href="{{ url_for('home') }}">
+            <button class="logout-btn">Logout</button>
+        </a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Add STP</h2>
+        <form method="POST" action="/admin/add_stp">
+            <input name="id" placeholder="ID" required>
+            <input name="name" placeholder="Name" required>
+            <input name="lat" placeholder="Latitude" required>
+            <input name="lon" placeholder="Longitude" required>
+            <input name="capacity" placeholder="Capacity (MLD)" required>
+            <button type="submit">Add STP</button>
+        </form>
+    </div>
+
+    <div class="grid">
+
+        <!-- STP TABLE -->
+        <div class="card">
+            <h2>STP Management</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Capacity</th>
+                        <th>Available</th>
+                        <th>Action</th>
+                    </tr>
+
+                    {% for stp in stps %}
+                    <tr>
+                        <td>{{ stp.stp_id }}</td>
+                        <td>{{ stp.stp_name }}</td>
+                        <td>{{ "%.2f"|format(stp.latitude) }}</td>
+                        <td>{{ "%.2f"|format(stp.longitude) }}</td>
+                        <td>{{ stp.total_capacity_mld }}</td>
+                        <td>{{ stp.available_capacity_mld }}</td>
+                        <td>
+                            <a class="delete-btn" href="/admin/delete_stp/{{ stp.stp_id }}">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <!-- ORDERS TABLE -->
+        <div class="card">
+            <h2>Orders</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>STP</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        </tr>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.stp_name }}</td>
+                            <td>{{ order.quantity_kld }}</td>
+                            <td>{{ order.status }}</td>
+                        </tr>
+                        {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

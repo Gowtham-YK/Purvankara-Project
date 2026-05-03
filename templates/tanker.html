@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<title>Tanker Operator Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+
+*{box-sizing:border-box;font-family:'Inter',sans-serif;}
+
+body{
+margin:0;
+background:#f4f7fb;
+}
+
+/* NAVBAR */
+
+.navbar{
+background:#111827;
+color:white;
+padding:14px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* MAIN LAYOUT */
+
+.container{
+display:flex;
+height:90vh;
+}
+
+/* LEFT ORDERS PANEL */
+
+.orders-column{
+width:35%;
+background:white;
+padding:20px;
+overflow-y:auto;
+border-right:1px solid #e5e7eb;
+}
+
+/* MAP */
+
+.map-section{
+width:65%;
+padding:20px;
+}
+
+#map{
+height:100%;
+border-radius:12px;
+}
+
+/* ORDER CARD */
+
+.order-card{
+background:#f9fafb;
+padding:16px;
+margin-bottom:15px;
+border-radius:10px;
+box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+
+.order-card p{
+margin:4px 0;
+}
+
+button{
+margin-top:10px;
+padding:8px 12px;
+background:#2563eb;
+border:none;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* ROUTE INFO */
+
+.route-info{
+background:white;
+padding:12px 16px;
+margin-bottom:10px;
+border-radius:8px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+display:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<h2>Tanker Operator Dashboard</h2>
+
+<a href="{{ url_for('home') }}">
+<button style="background:#ef4444;">Logout</button>
+</a>
+
+</div>
+
+<div class="container">
+
+<!-- LEFT PANEL -->
+
+<div class="orders-column">
+
+<h3>Available Orders</h3>
+
+{% for order in orders %}
+
+<div class="order-card">
+
+<p><strong>Order ID:</strong> {{ order.order_id }}</p>
+
+<p><strong>STP:</strong> {{ order.stp_name }}</p>
+
+<p><strong>Quantity:</strong> {{ order.quantity_kld }} KLD</p>
+
+<p><strong>Location:</strong> {{ order.location }}</p>
+<p><strong>Buyer:</strong> {{ order.buyer_name }}</p>
+<p><strong>Phone:</strong> {{ order.buyer_phone }}</p>
+
+<button onclick="showRoute(
+{{ order.stp_lat }},
+{{ order.stp_lon }},
+'{{ order.location }}',
+{{ order.distance_km }}
+)">
+View Route
+</button>
+
+<form method="POST" action="/accept_pickup">
+<input type="hidden" name="order_id" value="{{ order.order_id }}">
+<button type="submit">Accept Pickup</button>
+</form>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<!-- MAP SECTION -->
+
+<div class="map-section">
+
+<div id="routeInfo" class="route-info">
+
+<strong>Route Info</strong><br>
+
+Road Distance: <span id="routeDistance">--</span><br>
+ETA: <span id="routeTime">--</span>
+
+</div>
+
+<div id="map"></div>
+
+</div>
+
+</div>
+
+<script>
+
+/* MAP INITIALIZATION */
+
+var map = L.map('map').setView([12.9716,77.5946],11);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{attribution:'© OpenStreetMap contributors'}
+).addTo(map);
+
+var routeLayer = null;
+var startMarker = null;
+var endMarker = null;
+
+
+/* ROUTE FUNCTION */
+
+function showRoute(stpLat, stpLon, demandLocation){
+
+fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${demandLocation}, Bangalore`)
+
+.then(res => res.json())
+
+.then(demandData => {
+
+if(!demandData.length){
+alert("Demand location not found");
+return;
+}
+
+const demLat = parseFloat(demandData[0].lat);
+const demLon = parseFloat(demandData[0].lon);
+
+
+/* CLEAR PREVIOUS ROUTE */
+
+if(routeLayer) map.removeLayer(routeLayer);
+if(startMarker) map.removeLayer(startMarker);
+if(endMarker) map.removeLayer(endMarker);
+
+
+/* MARKERS */
+
+startMarker = L.marker([stpLat, stpLon])
+.addTo(map)
+.bindPopup("<b>STP Location</b>")
+.openPopup();
+
+endMarker = L.marker([demLat, demLon])
+.addTo(map)
+.bindPopup("<b>Demand Location</b>");
+
+
+/* ROUTE USING OSRM */
+
+fetch(`https://router.project-osrm.org/route/v1/driving/${stpLon},${stpLat};${demLon},${demLat}?overview=full&geometries=geojson`)
+
+.then(res => res.json())
+
+.then(routeData => {
+
+if(!routeData.routes || routeData.routes.length === 0){
+alert("Route not found");
+return;
+}
+
+const route = routeData.routes[0];
+
+const distanceKm = (route.distance / 1000).toFixed(2);
+const timeMin = (route.duration / 60).toFixed(1);
+
+
+/* DISPLAY ROUTE INFO */
+
+document.getElementById("routeDistance").innerText = distanceKm + " km";
+document.getElementById("routeTime").innerText = timeMin + " mins";
+document.getElementById("routeInfo").style.display = "block";
+
+
+/* DRAW ROUTE */
+
+routeLayer = L.geoJSON(route.geometry,{
+style:{
+color:"#2563eb",
+weight:5
+}
+}).addTo(map);
+
+
+map.fitBounds(routeLayer.getBounds(),{padding:[50,50]});
+
+});
+
+});
+
+}
+
+</script>
+
+</body>
+</html>

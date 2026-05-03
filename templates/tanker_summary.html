@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tanker Assignment Summary</title>
+<style>
+body {
+    font-family: Arial;
+    background: #f4f7fb;
+    padding: 40px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: auto;
+}
+
+.success { color: green; font-weight: bold; }
+.fail { color: red; font-weight: bold; }
+
+button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background: #2563eb;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<h2>🚛 Tanker Assignment Summary</h2>
+
+<p><strong>Order ID:</strong> {{ info.order_id }}</p>
+<p><strong>Total Water:</strong> {{ info.quantity }} KLD</p>
+<p><strong>Buyer:</strong> {{ info.buyer_name }}</p>
+<p><strong>Phone:</strong> {{ info.buyer_phone }}</p>
+
+<p><strong>Tankers Required:</strong> {{ info.tankers_required }}</p>
+<p><strong>Available Tankers:</strong> {{ info.available_tankers }}</p>
+
+{% if info.sufficient %}
+<p class="success">✔ Sufficient tankers available</p>
+{% else %}
+<p class="fail">❌ Not enough tankers available</p>
+{% endif %}
+
+<a href="{{ url_for('tanker_dashboard') }}">
+    <button>Back to Dashboard</button>
+</a>
+
+</div>
+
+<script>
+    setTimeout(() => {
+        window.location.href = "/supply?stp_id={{ stp_id }}";
+    }, 3000);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wastewater Routing Optimization System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+/* (UNCHANGED STYLES) */
+* { box-sizing:border-box; font-family:'Inter',sans-serif; }
+body { margin:0; background:#f4f7fb; color:#1f2937; }
+.navbar{ background:#111827; color:white; padding:14px 30px; display:flex; justify-content:space-between; align-items:center;}
+.logout-btn{ background:#ef4444; border:none; padding:8px 16px; color:white; border-radius:6px; cursor:pointer;}
+.hero {background:url("/static/assets/ocean.png") no-repeat center center; background-size:cover; text-align:center; color:white; padding:120px 20px 140px;}
+.container {max-width:900px; margin:-50px auto 60px; padding:0 20px;}
+.search-box {display:flex; gap:12px; margin-bottom:18px;}
+.search-box input,.search-box select {flex:1; padding:14px 16px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; background:white;}
+.search-box button {padding:14px 22px; background:#5fb46a; border:none; color:white; font-weight:600; border-radius:8px; cursor:pointer;}
+.result-card {background:white; border-radius:14px; padding:20px; box-shadow:0 12px 30px rgba(0,0,0,0.08); margin-bottom:25px;}
+.result-item {display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #e5e7eb;}
+.result-item:last-child {border-bottom:none;}
+.map-card {background:white; border-radius:14px; padding:18px; box-shadow:0 12px 30px rgba(0,0,0,0.08); margin-bottom:25px;}
+.map-box {height:400px; border-radius:14px; overflow:hidden;}
+#map {height:100%; width:100%;}
+.book-btn {margin-top:15px; background:#5fb46a; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600;}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+<h2>Demand Dashboard</h2>
+<a href="{{ url_for('home') }}">
+<button class="logout-btn">Logout</button>
+</a>
+</div>
+
+<section class="hero">
+<h1>Treated Wastewater Routing Optimization System</h1>
+<p>Intelligently matching treated wastewater to demand sites.</p>
+</section>
+
+<div class="container">
+
+<div class="search-box">
+<input type="text" id="placeInput" placeholder="Enter Location (Eg: Hebbal)">
+<input type="number" id="kldInput" placeholder="Required KLD">
+
+<select id="qualityInput">
+<option value="">Any Quality</option>
+<option value="Platinum">Platinum</option>
+<option value="Gold">Gold</option>
+<option value="Silver">Silver</option>
+<option value="General">General</option>
+</select>
+
+<select id="typeInput">
+<option value="">Any Type</option>
+<option value="treated">Treated</option>
+<option value="fresh">Fresh</option>
+<option value="general">General</option>
+</select>
+
+<button onclick="searchLocation()">Search</button>
+<button onclick="useLiveLocation()">📍 Live Location</button>
+</div>
+
+<div class="result-card" id="resultCard">
+<div class="result-item">🏭 <strong>Assigned STP:</strong> <span id="assignedStp">--</span></div>
+<div class="result-item">💧 <strong>Required Quantity:</strong> <span id="predictedKld">--</span></div>
+<div class="result-item">📍 <strong>Distance:</strong> <span id="distanceStp">--</span></div>
+</div>
+
+<div class="map-card">
+<h3>Wastewater Routing Map</h3>
+<div class="map-box">
+<div id="map"></div>
+</div>
+</div>
+
+</div>
+
+<script>
+
+/* 🔥 NEW GLOBAL VARIABLES */
+let liveLat = null;
+let liveLon = null;
+let useLive = false;
+
+var map = L.map('map').setView([12.9716,77.5946],11);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+var markersLayer = L.layerGroup().addTo(map);
+
+/* ================= LIVE LOCATION ================= */
+
+function useLiveLocation(){
+
+if(!navigator.geolocation){
+    alert("Geolocation not supported");
+    return;
+}
+
+navigator.geolocation.getCurrentPosition(function(position){
+
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    console.log("Live Location:", lat, lon);
+
+    // store values (optional)
+    liveLat = lat;
+    liveLon = lon;
+    useLive = true;
+
+    // 🔥 DIRECT CALL (THIS IS THE FIX)
+    searchLocation();
+
+}, function(){
+    alert("Location permission denied");
+});
+}
+
+/* ================= SEARCH FUNCTION ================= */
+
+function searchLocation(){
+
+let place=document.getElementById("placeInput").value;
+let requiredKLD=document.getElementById("kldInput").value || 0;
+let quality=document.getElementById("qualityInput").value;
+let type=document.getElementById("typeInput").value;
+
+/* 🔥 FIXED VALIDATION */
+if(!place && !useLive){
+    alert("Enter location or use Live Location");
+    return;
+}
+
+/* 🔥 DYNAMIC URL */
+let url = "";
+
+if(useLive){
+    url = `/api/search_place?lat=${liveLat}&lon=${liveLon}&required_kld=${requiredKLD}&quality=${quality}&type=${type}`;
+}else{
+    url = `/api/search_place?place=${place}&required_kld=${requiredKLD}&quality=${quality}&type=${type}`;
+}
+
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+
+if(data.error){ alert(data.error); return; }
+
+markersLayer.clearLayers();
+
+let location=data.searched_location;
+let nearest=data.nearest_stp;
+console.log("Nearest STP:", nearest);
+
+let lat=location.latitude;
+let lon=location.longitude;
+
+L.marker([lat,lon])
+.addTo(markersLayer)
+.bindPopup(`<b>${location.name}</b>`)
+.openPopup();
+
+map.setView([lat,lon],14);
+
+if(nearest){
+
+L.marker([nearest.latitude,nearest.longitude])
+.addTo(markersLayer)
+.bindPopup(`<b>${nearest.stp_name}</b><br>Distance: ${nearest.distance_km} km`)
+.openPopup();
+
+fetch(`https://router.project-osrm.org/route/v1/driving/${lon},${lat};${nearest.longitude},${nearest.latitude}?overview=full&geometries=geojson`)
+.then(res=>res.json())
+.then(routeData=>{
+if(!routeData.routes || routeData.routes.length===0) return;
+
+const route=routeData.routes[0];
+
+const routeLayer = L.geoJSON(route.geometry, {
+    style: { color: "#2563eb", weight: 5 }
+}).addTo(markersLayer);
+
+map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+
+const travelTime=(route.duration/60).toFixed(1);
+
+document.getElementById("distanceStp").innerText =
+nearest.distance_km + " km (road)";
+
+document.getElementById("predictedKld").innerText =
+requiredKLD+" KLD | ETA: "+travelTime+" mins";
+});
+
+document.getElementById("assignedStp").innerText=nearest.stp_name;
+
+/* 🔥 FIX BOOKING LOCATION */
+let locationLabel = location.name;
+
+addBookButton(nearest,requiredKLD,quality,type,locationLabel);
+}
+
+/* 🔥 RESET */
+
+
+});
+}
+
+
+function addBookButton(nearest, kld, quality, type, place){
+
+let oldBtn = document.getElementById("finalBookBtn");
+if(oldBtn) oldBtn.remove();
+
+let btn = document.createElement("button");
+btn.id = "finalBookBtn";
+btn.className = "book-btn";
+btn.innerText = "Book Order";
+
+btn.onclick = function(){
+
+    fetch("/create_order",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+            stp_id: nearest.stp_id,
+            stp_name: nearest.stp_name,
+            quantity_kld: kld,
+            quality: quality,
+            water_type: type,
+            distance_km: nearest.distance_km,
+            location: place
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert("Order Submitted Successfully!");
+    });
+};
+
+document.getElementById("resultCard").appendChild(btn);
+}
+</script>
+
+</body>
+</html>

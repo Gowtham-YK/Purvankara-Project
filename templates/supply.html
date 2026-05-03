@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<title>STP Supply Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{box-sizing:border-box;font-family:'Inter',sans-serif;}
+
+body{
+margin:0;
+background:#f4f7fb;
+color:#1f2937;
+}
+
+/* NAVBAR */
+
+.navbar{
+background:#111827;
+color:white;
+padding:14px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logout-btn{
+background:#ef4444;
+border:none;
+padding:8px 16px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* FORECAST BANNER */
+
+.forecast-banner{
+background:linear-gradient(135deg,#3b82f6,#6366f1);
+color:white;
+padding:20px 30px;
+font-size:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+}
+
+.graph-btn{
+background:white;
+color:#1f2937;
+padding:8px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:500;
+}
+
+/* GRAPH SECTION */
+
+.graph-container{
+display:none;
+padding:30px;
+background:#f4f7fb;
+}
+
+.graph-card{
+background:white;
+border-radius:14px;
+box-shadow:0 8px 25px rgba(0,0,0,0.06);
+padding:25px;
+max-width:720px;
+margin:0 auto;
+}
+
+/* DASHBOARD GRID */
+
+.dashboard{
+display:grid;
+grid-template-columns:320px 1fr 450px;
+gap:25px;
+padding:25px;
+}
+
+/* LEFT PANEL */
+
+.left-panel{
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+/* MAP */
+
+.map-container{
+background:white;
+border-radius:14px;
+padding:20px;
+box-shadow:0 8px 25px rgba(0,0,0,0.06);
+}
+
+#map{
+height:450px;
+border-radius:10px;
+}
+
+/* REQUEST PANEL */
+
+.requests-panel{
+background:white;
+border-radius:14px;
+padding:20px;
+box-shadow:0 8px 25px rgba(0,0,0,0.06);
+overflow-y:auto;
+}
+
+/* CARDS */
+
+.card{
+background:white;
+padding:20px;
+border-radius:14px;
+box-shadow:0 8px 25px rgba(0,0,0,0.06);
+}
+
+input,select{
+width:100%;
+padding:8px;
+margin-bottom:12px;
+border-radius:6px;
+border:1px solid #d1d5db;
+}
+
+button{
+padding:8px 14px;
+border-radius:6px;
+border:none;
+background:#16a34a;
+color:white;
+cursor:pointer;
+}
+
+.accept{background:#16a34a;}
+.reject{background:#dc2626;}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #e5e7eb;
+text-align:left;
+}
+
+.status-pending{color:#f59e0b;font-weight:600;}
+.status-accepted{color:#16a34a;font-weight:600;}
+.status-rejected{color:#dc2626;font-weight:600;}
+
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+<h2>STP Operator Dashboard</h2>
+
+<a href="{{ url_for('home') }}">
+<button class="logout-btn">Logout</button>
+</a>
+
+</div>
+
+<!-- FORECAST BANNER -->
+
+{% if selected_stp %}
+
+<div class="forecast-banner">
+
+<div>
+<strong>Tomorrow Demand Forecast:</strong>
+{% if prediction is not none %}
+{{ prediction }} KLD
+{% else %}
+Prediction unavailable
+{% endif %}
+</div>
+
+<div>
+<strong>Technology:</strong> {{ selected_stp.technology }}
+</div>
+
+<div>
+<strong>Available Capacity:</strong>
+{{ selected_stp.available_capacity_mld * 1000 }} KLD
+</div>
+
+<button class="graph-btn" onclick="toggleGraph()">
+Weekly Forecast Graph
+</button>
+
+</div>
+
+{% endif %}
+
+<!-- GRAPH DROPDOWN -->
+
+<div id="graphSection" class="graph-container">
+
+<div class="graph-card" style="
+width:650px;
+height:350px;
+margin:30px auto;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+">
+
+<h3 style="margin-bottom:20px;">Weekly Demand Forecast</h3>
+
+<canvas id="forecastChart" style="width:100%;height:300px;"></canvas>
+
+</div>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div class="dashboard">
+
+<!-- LEFT PANEL -->
+
+<div class="left-panel">
+
+<div class="card">
+
+<h3>Select Your STP</h3>
+
+<form method="GET" action="/supply">
+
+<select name="stp_id" onchange="this.form.submit()" required>
+
+<option value="">-- Select STP --</option>
+
+{% for stp in stps %}
+
+<option value="{{ stp.stp_id }}"
+{% if selected_stp and selected_stp.stp_id == stp.stp_id %}selected{% endif %}>
+{{ stp.stp_name }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</form>
+
+</div>
+
+{% if selected_stp %}
+
+<div class="card">
+
+<h3>Update Available Capacity</h3>
+
+<form method="POST" action="/update_capacity">
+
+<input type="hidden" name="stp_id" value="{{ selected_stp.stp_id }}">
+
+<input type="number"
+name="available_capacity_mld"
+step="0.01"
+value="{{ selected_stp.available_capacity_mld }}"
+required>
+
+<button type="submit">Update</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h3>Upload Water Quality Report</h3>
+
+<form method="POST" action="/upload_quality" enctype="multipart/form-data">
+
+<input type="hidden" name="stp_id" value="{{ selected_stp.stp_id }}">
+
+<input type="file" name="report" required>
+
+<select name="quality_grade">
+
+<option value="Gold">Gold</option>
+<option value="Silver">Silver</option>
+<option value="Bronze">Bronze</option>
+
+</select>
+
+<button type="submit">Upload</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h3>STP Details</h3>
+
+<p><strong>Total Capacity:</strong> {{ selected_stp.total_capacity_mld }} MLD</p>
+<p><strong>Current Load:</strong> {{ selected_stp.current_load_mld }} MLD</p>
+<p><strong>Quality:</strong> {{ selected_stp.quality_grade }}</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- MAP -->
+
+<div class="map-container">
+
+<h3>STP Location</h3>
+
+<div id="map"></div>
+
+</div>
+
+<!-- REQUESTS -->
+
+<div class="requests-panel">
+
+<h3>Demand Requests</h3>
+
+{% if selected_stp %}
+
+<table>
+
+<tr>
+<th>Site</th>
+<th>Quantity</th>
+<th>Quality</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for demand in demands %}
+
+<tr>
+
+<td>{{ demand.site_name }}</td>
+<td>{{ demand.quantity }}</td>
+<td>{{ demand.quality_required }}</td>
+
+<td>
+
+    {% set status = demand.status | lower %}
+    
+    {% if status == "pending" %}
+    <span class="status-pending">Pending</span>
+    
+    {% elif status == "accepted" %}
+    <span class="status-accepted">Accepted</span>
+    
+    {% elif status == "out for delivery" %}
+    <span style="color:#2563eb;font-weight:600;">Out for Delivery</span>
+    
+    {% elif status == "rejected" %}
+    <span class="status-rejected">Rejected</span>
+    
+    {% else %}
+    —
+    {% endif %}
+    
+    </td>
+
+<td>
+
+    {% if demand.status | lower == "pending" %}
+    <form method="POST" action="/handle_request">
+        <input type="hidden" name="request_id" value="{{ demand.request_id }}">
+        <button class="accept" name="action" value="accept">Accept</button>
+        <button class="reject" name="action" value="reject">Reject</button>
+    </form>
+    {% else %}
+    —
+    {% endif %}
+    
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endif %}
+
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+/* GRAPH TOGGLE */
+
+function toggleGraph(){
+
+var section=document.getElementById("graphSection");
+
+if(section.style.display==="none" || section.style.display===""){
+section.style.display="block";
+}else{
+section.style.display="none";
+}
+
+}
+
+/* CHART */
+
+{% if weekly_forecast %}
+
+const weeklyData = {{ weekly_forecast | tojson }};
+
+const ctx=document.getElementById('forecastChart');
+
+new Chart(ctx,{
+type:'line',
+data:{
+labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+datasets:[{
+label:'Predicted Demand (KLD)',
+data:weeklyData,
+borderColor:'#2563eb',
+borderWidth:3,
+pointRadius:4,
+pointBackgroundColor:'#2563eb',
+fill:false,
+tension:0
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{
+labels:{font:{size:14}}
+}
+},
+scales:{
+x:{
+grid:{display:false}
+},
+y:{
+title:{display:true,text:'Demand (KLD)'},
+grid:{color:'rgba(0,0,0,0.05)'}
+}
+}
+}
+});
+
+{% endif %}
+
+/* MAP */
+
+var lat=12.9716;
+var lng=77.5946;
+
+{% if selected_stp and selected_stp.latitude %}
+lat={{ selected_stp.latitude }};
+lng={{ selected_stp.longitude }};
+{% endif %}
+
+var map=L.map('map').setView([lat,lng],12);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{attribution:'© OpenStreetMap contributors'}
+).addTo(map);
+
+{% if selected_stp and selected_stp.latitude %}
+
+L.marker([lat,lng])
+.addTo(map)
+.bindPopup("<b>{{ selected_stp.stp_name }}</b>")
+.openPopup();
+
+{% endif %}
+</script>
+
+</body>
+</html>
