@@ -246,7 +246,9 @@ fetch(url)
 
 if(data.error){ alert(data.error); return; }
 
-markersLayer.clearLayers();   // ✅ single clean reset
+markersLayer.eachLayer(function(layer){
+    markersLayer.removeLayer(layer);
+});   // ✅ single clean reset
 
 let location=data.searched_location;
 let nearest=data.nearest_stp;
