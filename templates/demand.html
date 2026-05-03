@@ -20,24 +20,32 @@ body { margin:0; background:#f4f7fb; color:#1f2937; overflow-x: hidden;}
 .container {max-width:900px; margin:-50px auto 60px; padding:0 20px;}
 .search-box {
     display: flex;
-    flex-wrap: wrap;   /* 🔥 allows wrapping */
+    justify-content: center;
+    align-items: center;
     gap: 12px;
+    flex-wrap: nowrap;   /* ✅ single row */
     margin-bottom: 18px;
 }
 .search-box input,
 .search-box select {
-    flex: 1 1 200px;   /* 🔥 responsive width */
-    min-width: 150px;
+    height: 42px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    background: #f3f4f6;
+    font-size: 14px;
+    min-width: 170px;
 }
 .search-box button {
-    padding:14px 22px;
+    height: 42px;
+    padding: 0 22px;
     background:#5fb46a;
     border:none;
     color:white;
     font-weight:600;
-    border-radius:8px;
+    border-radius:10px;
     cursor:pointer;
-    flex: 1 1 150px;   /* 🔥 responsive */
+    white-space: nowrap;
 }
 .result-card {background:white; border-radius:14px; padding:20px; box-shadow:0 12px 30px rgba(0,0,0,0.08); margin-bottom:25px;}
 .result-item {display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #e5e7eb;}

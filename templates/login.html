@@ -21,12 +21,13 @@
             align-items: center;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             overflow-x: hidden;
+            padding: 20px;
         }
 
         .login-container {
             width: 90%;
             max-width: 900px;
-            height: 520px;
+            min-height: 520px;   /* ✅ flexible instead of fixed */
             display: flex;
             border-radius: 16px;
             overflow: hidden;
@@ -59,15 +60,17 @@
         /* RIGHT PANEL */
         .right-panel {
             width: 50%;
-            padding: 60px 50px;
+            padding: 50px 40px;
+            gap: 10px;  
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .right-panel h2 {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             color: #1f2937;
+            text-align: center;
         }
 
         .input-group {
@@ -85,37 +88,40 @@
         .input-group input,
         .input-group select {
             width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            outline: none;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
             font-size: 14px;
-            transition: 0.3s;
+            background: #f9fafb;
+            transition: all 0.25s ease;
         }
 
         .input-group input:focus,
         .input-group select:focus {
             border-color: #2563eb;
-            box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
         .login-btn {
-            margin-top: 10px;
+            margin-top: 12px;
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 13px;
+            border-radius: 10px;
             border: none;
-            background: #16a34a;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
             color: white;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.25s ease;
         }
 
         .login-btn:hover {
             background: #15803d;
             transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
         }
 
         .back-link {
