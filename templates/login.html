@@ -15,15 +15,17 @@
 
         body {
             margin: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            overflow-x: hidden;
         }
 
         .login-container {
-            width: 900px;
+            width: 90%;
+            max-width: 900px;
             height: 520px;
             display: flex;
             border-radius: 16px;
@@ -145,6 +147,50 @@
                 padding: 40px 30px;
             }
         }
+
+        /* ================= MOBILE FIX ================= */
+@media (max-width: 600px) {
+
+body {
+    padding: 10px;
+    align-items: flex-start;   /* ✅ prevents cutoff */
+}
+
+.login-container {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.left-panel {
+    display: none;   /* 🔥 hide left panel for mobile */
+}
+
+.right-panel {
+    width: 100%;
+    padding: 30px 20px;
+}
+
+.right-panel h2 {
+    font-size: 20px;
+    text-align: center;
+}
+
+.input-group input,
+.input-group select {
+    font-size: 13px;
+    padding: 10px;
+}
+
+.login-btn {
+    font-size: 14px;
+    padding: 10px;
+}
+
+.back-link {
+    font-size: 12px;
+}
+}
 
     </style>
 </head>

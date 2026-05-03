@@ -19,6 +19,7 @@ body{
 margin:0;
 background:#f4f7fb;
 color:#1f2937;
+overflow-x:hidden;
 }
 
 /* NAVBAR */
@@ -86,7 +87,7 @@ margin:0 auto;
 
 .dashboard{
 display:grid;
-grid-template-columns:320px 1fr 450px;
+grid-template-columns:1fr 2fr 1fr;   /* ✅ flexible */
 gap:25px;
 padding:25px;
 }
@@ -109,7 +110,8 @@ box-shadow:0 8px 25px rgba(0,0,0,0.06);
 }
 
 #map{
-height:450px;
+width:100%;
+height:400px;
 border-radius:10px;
 }
 
@@ -121,6 +123,7 @@ border-radius:14px;
 padding:20px;
 box-shadow:0 8px 25px rgba(0,0,0,0.06);
 overflow-y:auto;
+max-height:500px;  
 }
 
 /* CARDS */
@@ -167,6 +170,67 @@ text-align:left;
 .status-pending{color:#f59e0b;font-weight:600;}
 .status-accepted{color:#16a34a;font-weight:600;}
 .status-rejected{color:#dc2626;font-weight:600;}
+
+/* ================= TABLET ================= */
+@media (max-width: 1024px) {
+
+.dashboard{
+    grid-template-columns:1fr;   /* stack everything */
+}
+
+.map-container{
+    order:2;
+}
+
+.requests-panel{
+    order:3;
+}
+
+.left-panel{
+    order:1;
+}
+
+#map{
+    height:350px;
+}
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 600px) {
+
+.navbar{
+    flex-direction:column;
+    gap:10px;
+    text-align:center;
+}
+
+.forecast-banner{
+    flex-direction:column;
+    text-align:center;
+}
+
+.dashboard{
+    padding:15px;
+    gap:15px;
+}
+
+.card{
+    padding:15px;
+}
+
+button{
+    width:100%;
+}
+
+table{
+    display:block;
+    overflow-x:auto;
+}
+
+#map{
+    height:280px;
+}
+}
 
 </style>
 </head>

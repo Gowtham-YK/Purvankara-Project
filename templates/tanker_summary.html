@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tanker Assignment Summary</title>
 <style>
 body {
     font-family: Arial;
     background: #f4f7fb;
-    padding: 40px;
+    padding: 20px;
+    overflow-x: hidden;
 }
 
 .card {
@@ -14,6 +16,7 @@ body {
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    width: 100%;
     max-width: 500px;
     margin: auto;
 }
@@ -29,7 +32,36 @@ button {
     color: white;
     border-radius: 6px;
     cursor: pointer;
+    width: 100%;   /* ✅ important */
 }
+
+/* ================= MOBILE FIX ================= */
+@media (max-width: 600px) {
+
+body {
+    padding: 10px;
+}
+
+.card {
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h2 {
+    font-size: 20px;
+    text-align: center;
+}
+
+p {
+    font-size: 14px;
+}
+
+button {
+    font-size: 14px;
+    padding: 10px;
+}
+}
+
 </style>
 </head>
 

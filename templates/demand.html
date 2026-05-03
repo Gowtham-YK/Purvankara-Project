@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wastewater Routing Optimization System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -12,14 +13,32 @@
 <style>
 /* (UNCHANGED STYLES) */
 * { box-sizing:border-box; font-family:'Inter',sans-serif; }
-body { margin:0; background:#f4f7fb; color:#1f2937; }
+body { margin:0; background:#f4f7fb; color:#1f2937; overflow-x: hidden;}
 .navbar{ background:#111827; color:white; padding:14px 30px; display:flex; justify-content:space-between; align-items:center;}
 .logout-btn{ background:#ef4444; border:none; padding:8px 16px; color:white; border-radius:6px; cursor:pointer;}
-.hero {background:url("/static/assets/ocean.png") no-repeat center center; background-size:cover; text-align:center; color:white; padding:120px 20px 140px;}
+.hero {background:url("/static/assets/ocean.png") no-repeat center center; background-size:cover; text-align:center; color:white; padding:80px 20px;}
 .container {max-width:900px; margin:-50px auto 60px; padding:0 20px;}
-.search-box {display:flex; gap:12px; margin-bottom:18px;}
-.search-box input,.search-box select {flex:1; padding:14px 16px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; background:white;}
-.search-box button {padding:14px 22px; background:#5fb46a; border:none; color:white; font-weight:600; border-radius:8px; cursor:pointer;}
+.search-box {
+    display: flex;
+    flex-wrap: wrap;   /* 🔥 allows wrapping */
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.search-box input,
+.search-box select {
+    flex: 1 1 200px;   /* 🔥 responsive width */
+    min-width: 150px;
+}
+.search-box button {
+    padding:14px 22px;
+    background:#5fb46a;
+    border:none;
+    color:white;
+    font-weight:600;
+    border-radius:8px;
+    cursor:pointer;
+    flex: 1 1 150px;   /* 🔥 responsive */
+}
 .result-card {background:white; border-radius:14px; padding:20px; box-shadow:0 12px 30px rgba(0,0,0,0.08); margin-bottom:25px;}
 .result-item {display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #e5e7eb;}
 .result-item:last-child {border-bottom:none;}
@@ -27,6 +46,55 @@ body { margin:0; background:#f4f7fb; color:#1f2937; }
 .map-box {height:400px; border-radius:14px; overflow:hidden;}
 #map {height:100%; width:100%;}
 .book-btn {margin-top:15px; background:#5fb46a; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600;}
+
+/* ================= TABLET ================= */
+@media (max-width: 1024px) {
+
+.container {
+    margin-top: -30px;
+}
+
+.map-box {
+    height: 350px;
+}
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 600px) {
+
+.navbar {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+}
+
+.hero {
+    padding: 60px 15px;
+}
+
+.search-box {
+    flex-direction: column;
+}
+
+.search-box input,
+.search-box select,
+.search-box button {
+    width: 100%;
+}
+
+.map-box {
+    height: 280px;
+}
+
+h1 {
+    font-size: 20px;
+}
+
+p {
+    font-size: 14px;
+}
+}
+
 </style>
 </head>
 
