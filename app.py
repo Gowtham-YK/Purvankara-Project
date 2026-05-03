@@ -372,14 +372,26 @@ def api_search_place():
 
     nearby.sort(key=lambda x: x["distance_km"])
     nearest = nearby[0] if nearby else None
+    
+    if not nearest:
+        return jsonify({
+        "searched_location": {
+            "name": location_name,
+            "latitude": lat,
+            "longitude": lon
+        },
+        "nearest_stp": None,
+        "all_stps": []
+    })
 
     return jsonify({
-        "searched_location":{
-            "name":location_name,
-            "latitude":lat,
-            "longitude":lon
+        "searched_location": {
+            "name": location_name,
+            "latitude": lat,
+            "longitude": lon
         },
-        "nearest_stp":nearest
+        "nearest_stp": nearest,
+        "all_stps": [s for s in stps if s.get("latitude") and s.get("longitude")]
     })
 
 @app.route("/create_order", methods=["POST"])
@@ -415,6 +427,32 @@ def create_order():
         writer.writerow(row)
 
     return jsonify({"message":"Order created successfully"})
+
+
+@app.route("/api/my_orders")
+def my_orders():
+
+    buyer_name = session.get("buyer_name")
+    buyer_phone = session.get("buyer_phone")
+
+    results = []
+
+    if os.path.exists(ORDERS_FILE):
+        with open(ORDERS_FILE, "r") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                if (
+                    row.get("buyer_name") == buyer_name and
+                    row.get("buyer_phone") == buyer_phone
+                ):
+                    results.append({
+                        "order_id": row.get("order_id"),
+                        "status": row.get("status"),
+                        "location": row.get("location")
+                    })
+
+    return jsonify(results)
 
 # =========================================================
 # SUPPLY SIDE
@@ -478,6 +516,8 @@ def supply():
                         "site_name": row.get("location"),
                         "quantity": row.get("quantity_kld"),
                         "quality_required": row.get("quality"),
+                        "buyer_name": row.get("buyer_name"),        # ✅ ADD THIS
+                        "buyer_phone": row.get("buyer_phone"),      # ✅ ADD THIS
                         "status": (row.get("status") or "").strip(),
                         "created_at": row.get("created_at")
                     }

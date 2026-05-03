@@ -243,7 +243,7 @@ table{
 
 <h2>STP Operator Dashboard</h2>
 
-<a href="{{ url_for('home') }}">
+<a href="{{ url_for('login') }}">
 <button class="logout-btn">Logout</button>
 </a>
 
@@ -417,20 +417,24 @@ required>
 <table>
 
 <tr>
-<th>Site</th>
-<th>Quantity</th>
-<th>Quality</th>
-<th>Status</th>
-<th>Action</th>
+    <th>Site</th>
+    <th>Buyer</th>        <!-- ✅ ADD -->
+    <th>Phone</th>        <!-- ✅ ADD -->
+    <th>Quantity</th>
+    <th>Quality</th>
+    <th>Status</th>
+    <th>Action</th>
 </tr>
 
 {% for demand in demands %}
 
 <tr>
 
-<td>{{ demand.site_name }}</td>
-<td>{{ demand.quantity }}</td>
-<td>{{ demand.quality_required }}</td>
+    <td>{{ demand.site_name }}</td>
+    <td>{{ demand.buyer_name }}</td>   <!-- ✅ ADD -->
+    <td>{{ demand.buyer_phone }}</td>  <!-- ✅ ADD -->
+    <td>{{ demand.quantity }}</td>
+    <td>{{ demand.quality_required }}</td>
 
 <td>
 

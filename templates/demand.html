@@ -102,7 +102,7 @@ p {
 
 <div class="navbar">
 <h2>Demand Dashboard</h2>
-<a href="{{ url_for('home') }}">
+<a href="{{ url_for('login') }}">
 <button class="logout-btn">Logout</button>
 </a>
 </div>
@@ -167,6 +167,26 @@ attribution:'&copy; OpenStreetMap contributors'
 
 var markersLayer = L.layerGroup().addTo(map);
 
+let allStpMarkers = [];   // ✅ store all STPs
+
+// ================= LOAD ALL STPS =================
+fetch("/api/stps")
+.then(res => res.json())
+.then(stps => {
+
+    stps.forEach(stp => {
+        if(stp.latitude && stp.longitude){
+
+            let marker = L.marker([stp.latitude, stp.longitude])
+                .addTo(markersLayer)
+                .bindPopup(`<b>${stp.stp_name}</b>`);
+
+            allStpMarkers.push(marker);   // ✅ store marker
+        }
+    });
+
+});
+
 /* ================= LIVE LOCATION ================= */
 
 function useLiveLocation(){
@@ -226,7 +246,7 @@ fetch(url)
 
 if(data.error){ alert(data.error); return; }
 
-markersLayer.clearLayers();
+markersLayer.clearLayers();   // ✅ single clean reset
 
 let location=data.searched_location;
 let nearest=data.nearest_stp;
@@ -244,7 +264,12 @@ map.setView([lat,lon],14);
 
 if(nearest){
 
-L.marker([nearest.latitude,nearest.longitude])
+    L.marker([nearest.latitude, nearest.longitude], {
+    icon: L.icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+        iconSize: [32,32]
+    })
+})
 .addTo(markersLayer)
 .bindPopup(`<b>${nearest.stp_name}</b><br>Distance: ${nearest.distance_km} km`)
 .openPopup();
