@@ -432,11 +432,7 @@ orderInfo.style.borderRadius = "8px";
 
 orderInfo.innerHTML = `
     ✅ Order Placed Successfully<br>
-    📦 Order ID: <strong>${data.order_id}</strong><br><br>
-    <button onclick="goToTracking('${data.order_id}')"
-    style="background:#2563eb;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">
-    Track Order
-    </button>
+    📦 Order ID: <strong>${data.order_id}</strong>
 `;
 
 resultBox.appendChild(orderInfo);
