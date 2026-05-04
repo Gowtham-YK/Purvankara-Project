@@ -466,6 +466,9 @@ def track_order():
 
     order_id = request.args.get("order_id")
     phone = request.args.get("phone")
+    
+    if not order_id and not phone:
+        return jsonify({"error": "Provide order_id or phone"}), 400
 
     results = []
 
@@ -482,9 +485,11 @@ def track_order():
                         "order_id": row.get("order_id"),
                         "status": row.get("status"),
                         "location": row.get("location"),
-                        "stp_name": row.get("stp_name")
+                        "stp_name": row.get("stp_name"),
+                        "created_at": row.get("created_at")
                     })
 
+    results.sort(key=lambda x: x["order_id"], reverse=True)
     return jsonify(results)
 
 # =========================================================

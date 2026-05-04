@@ -244,9 +244,21 @@ var endMarker = null;
 
 /* ROUTE FUNCTION */
 
-function showRoute(stpLat, stpLon, demandLocation){
+function showRoute(stpLat, stpLon, demandLocation, distanceKm){
 
-fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${demandLocation}, Bangalore`)
+    if(!stpLat || !stpLon || stpLat === 0 || stpLon === 0){
+    alert("STP location not available");
+    return;
+}
+
+fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(demandLocation)}`)
+.then(res => res.json())
+.then(demandData => {
+
+    if(!demandData || demandData.length === 0){
+        alert("Demand location not found");
+        return;
+    }
 
 .then(res => res.json())
 
@@ -263,7 +275,10 @@ const demLon = parseFloat(demandData[0].lon);
 
 /* CLEAR PREVIOUS ROUTE */
 
-if(routeLayer) map.removeLayer(routeLayer);
+if(routeLayer){
+    map.removeLayer(routeLayer);
+    routeLayer = null;
+}
 if(startMarker) map.removeLayer(startMarker);
 if(endMarker) map.removeLayer(endMarker);
 
@@ -283,6 +298,13 @@ endMarker = L.marker([demLat, demLon])
 /* ROUTE USING OSRM */
 
 fetch(`https://router.project-osrm.org/route/v1/driving/${stpLon},${stpLat};${demLon},${demLat}?overview=full&geometries=geojson`)
+.then(res => res.json())
+.then(routeData => {
+
+    if(!routeData || !routeData.routes || routeData.routes.length === 0){
+        alert("Route not found");
+        return;
+    }
 
 .then(res => res.json())
 
