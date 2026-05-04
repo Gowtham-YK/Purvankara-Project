@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Track Order</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    margin:0;
+    background:#f4f7fb;
+}
+
+/* NAVBAR */
+.navbar{
+    background:#111827;
+    color:white;
+    padding:14px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.navbar button{
+    background:#2563eb;
+    border:none;
+    color:white;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+@media (max-width: 600px){
+
+.navbar{
+    flex-direction: column;
+    gap:10px;
+    text-align:center;
+}
+
+.navbar h2{
+    font-size:18px;
+}
+
+}
+
+/* MAIN */
+.container{
+    max-width:600px;
+    margin:40px auto;
+    padding:20px;
+    width:100%;
+}
+
+/* CARD */
+.card{
+    background:white;
+    padding:30px;
+    border-radius:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.08);
+    width:100%;
+}
+
+/* INPUT */
+input{
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    border-radius:8px;
+    border:1px solid #d1d5db;
+    font-size:14px;
+}
+
+/* BUTTON */
+.track-btn{
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#5fb46a;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    font-size:14px;
+}
+
+/* RESULT */
+.result{
+    margin-top:20px;
+}
+
+.result-card{
+    background:#f9fafb;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:12px;
+    border-left:5px solid #2563eb;
+}
+
+.status{
+    font-weight:600;
+}
+
+@media (max-width:600px){
+
+.container{
+    margin:20px auto;
+    padding:15px;
+}
+
+.card{
+    padding:20px;
+}
+
+input{
+    font-size:14px;
+}
+
+.track-btn{
+    font-size:14px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <h2>Order Tracking</h2>
+
+    <a href="/demand">
+        <button>← Back</button>
+    </a>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+<div class="card">
+
+<h2>Track Your Order</h2>
+
+<input type="text" id="orderId" placeholder="Enter Order ID">
+<input type="text" id="phone" placeholder="Or Enter Phone Number">
+
+<button class="track-btn" onclick="trackOrder()">Track Order</button>
+
+<div id="result" class="result"></div>
+
+</div>
+
+</div>
+
+<script>
+
+function trackOrder(){
+
+let orderId = document.getElementById("orderId").value;
+let phone = document.getElementById("phone").value;
+
+let url = `/api/track_order?order_id=${orderId}&phone=${phone}`;
+
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+
+    if(!data.length){
+        document.getElementById("result").innerHTML = "<p>No orders found</p>";
+        return;
+    }
+
+    let html = "";
+
+    data.forEach(order => {
+
+        let color = "#2563eb";
+
+        if(order.status === "Pending") color = "#f59e0b";
+        if(order.status === "Accepted") color = "#22c55e";
+        if(order.status === "Out for Delivery") color = "#16a34a";
+
+        html += `
+        <div class="result-card" style="border-left-color:${color}">
+            <p><strong>Order ID:</strong> ${order.order_id}</p>
+            <p class="status"><strong>Status:</strong> ${order.status}</p>
+            <p><strong>STP:</strong> ${order.stp_name}</p>
+            <p><strong>Location:</strong> ${order.location}</p>
+        </div>
+        `;
+    });
+
+    document.getElementById("result").innerHTML = html;
+
+});
+
+}
+</script>
+
+</body>
+</html>

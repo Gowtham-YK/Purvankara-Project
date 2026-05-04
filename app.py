@@ -274,6 +274,10 @@ def delete_stp(stp_id):
 def demand():
     return render_template("demand.html")
 
+@app.route("/track")
+def track_page():
+    return render_template("track.html")
+
 @app.route("/api/stps")
 def api_stps():
     return jsonify(load_stps())
@@ -426,7 +430,10 @@ def create_order():
         ])
         writer.writerow(row)
 
-    return jsonify({"message":"Order created successfully"})
+    return jsonify({
+    "message": "Order created successfully",
+    "order_id": order_id   # ✅ ADD THIS
+})
 
 
 @app.route("/api/my_orders")
@@ -450,6 +457,32 @@ def my_orders():
                         "order_id": row.get("order_id"),
                         "status": row.get("status"),
                         "location": row.get("location")
+                    })
+
+    return jsonify(results)
+
+@app.route("/api/track_order")
+def track_order():
+
+    order_id = request.args.get("order_id")
+    phone = request.args.get("phone")
+
+    results = []
+
+    if os.path.exists(ORDERS_FILE):
+        with open(ORDERS_FILE, "r") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                if (
+                    (order_id and row.get("order_id") == order_id) or
+                    (phone and row.get("buyer_phone") == phone)
+                ):
+                    results.append({
+                        "order_id": row.get("order_id"),
+                        "status": row.get("status"),
+                        "location": row.get("location"),
+                        "stp_name": row.get("stp_name")
                     })
 
     return jsonify(results)

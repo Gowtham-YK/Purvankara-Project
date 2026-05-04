@@ -103,17 +103,90 @@ p {
 }
 }
 
+/* ================= HELP CENTRE ================= */
+
+#helpBtn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: linear-gradient(135deg, #2563eb, #22c55e);
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    z-index: 999;
+}
+
+#helpPanel {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 300px;
+    max-height: 420px;
+    overflow-y: auto;
+
+    backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.7);
+    border-radius: 14px;
+    padding: 18px;
+
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+
+    display: none;
+    z-index: 999;
+    color: white;
+}
+
+.help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.help-header span {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.help-section {
+    margin-top: 15px;
+}
+
+.help-section h4 {
+    margin-bottom: 6px;
+}
+
+.help-section ul {
+    padding-left: 18px;
+    line-height: 1.5;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="navbar">
-<h2>Demand Dashboard</h2>
-<a href="{{ url_for('login') }}">
-<button class="logout-btn">Logout</button>
-</a>
-</div>
+    <div class="navbar">
+        <h2>Demand Dashboard</h2>
+        
+        <div style="display:flex; gap:10px;">
+        
+        <a href="/track">
+        <button style="background:#2563eb; border:none; padding:8px 16px; color:white; border-radius:6px; cursor:pointer;">
+        Track Order
+        </button>
+        </a>
+        
+        <a href="{{ url_for('login') }}">
+        <button class="logout-btn">Logout</button>
+        </a>
+        
+        </div>
+        
+        </div>
 
 <section class="hero">
 <h1>Treated Wastewater Routing Optimization System</h1>
@@ -348,13 +421,81 @@ btn.onclick = function(){
     })
     .then(res=>res.json())
     .then(data=>{
-        alert("Order Submitted Successfully!");
-    });
+
+let resultBox = document.getElementById("resultCard");
+
+let orderInfo = document.createElement("div");
+orderInfo.style.marginTop = "15px";
+orderInfo.style.padding = "12px";
+orderInfo.style.background = "#ecfdf5";
+orderInfo.style.borderRadius = "8px";
+
+orderInfo.innerHTML = `
+    ✅ Order Placed Successfully<br>
+    📦 Order ID: <strong>${data.order_id}</strong><br><br>
+    <button onclick="goToTracking('${data.order_id}')"
+    style="background:#2563eb;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">
+    Track Order
+    </button>
+`;
+
+resultBox.appendChild(orderInfo);
+
+});
 };
 
 document.getElementById("resultCard").appendChild(btn);
 }
+
+/* ================= HELP TOGGLE ================= */
+function toggleHelp(){
+    const panel = document.getElementById("helpPanel");
+    panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+function goToTracking(orderId){
+    window.location.href = `/track?order_id=${orderId}`;
+}
+
 </script>
+
+<!-- HELP BUTTON -->
+<button id="helpBtn" onclick="toggleHelp()">💬 Help</button>
+
+<!-- HELP PANEL -->
+<div id="helpPanel">
+
+    <div class="help-header">
+        <h3>Help Centre</h3>
+        <span onclick="toggleHelp()">✕</span>
+    </div>
+
+    <div class="help-section">
+        <h4>How to Use</h4>
+        <ul>
+            <li>Enter location or use Live Location</li>
+            <li>Enter required KLD</li>
+            <li>Select quality & type</li>
+            <li>Click Search to find nearest STP</li>
+        </ul>
+    </div>
+
+    <div class="help-section">
+        <h4>Order Status</h4>
+        <ul>
+            <li>⏳ Pending → Waiting for approval</li>
+            <li>✅ Accepted → STP approved request</li>
+            <li>🚛 Out for Delivery → Tanker on the way</li>
+        </ul>
+    </div>
+
+    <div class="help-section">
+        <h4>Support</h4>
+        <p>📞 +91 9876543210</p>
+        <p>📧 support@waterflow.com</p>
+    </div>
+
+</div>
 
 </body>
 </html>
